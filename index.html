@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Economy - Futuristic Trading Platform</title>
+    <meta name="description" content="Experience the future of economy in a cosmic 3D environment">
+    
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Three.js and GSAP from CDN for faster loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r158/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.34/bundled/lenis.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="cosmic-loader">
+                <div class="orbit">
+                    <div class="planet"></div>
+                </div>
+                <div class="orbit orbit-2">
+                    <div class="planet planet-2"></div>
+                </div>
+                <div class="orbit orbit-3">
+                    <div class="planet planet-3"></div>
+                </div>
+            </div>
+            <h2 class="loading-text">Initializing Cosmic Economy</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="logo-icon">🌌</span>
+                <span class="logo-text">Cosmic Economy</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" data-text="Home">Home</a></li>
+                <li><a href="#markets" data-text="Markets">Markets</a></li>
+                <li><a href="#planets" data-text="Planets">Planets</a></li>
+                <li><a href="#trading" data-text="Trading">Trading</a></li>
+                <li><a href="#contact" data-text="Contact">Contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3D Background Container -->
+    <div id="three-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">Welcome to the</span>
+                    <span class="title-line cosmic-text">Cosmic Economy</span>
+                    <span class="title-line">of Tomorrow</span>
+                </h1>
+                <p class="hero-description">
+                    Experience interplanetary trading like never before. Navigate through distant galaxies, 
+                    discover new economic opportunities, and build your cosmic empire.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="explore-btn">
+                        <span>Explore Universe</span>
+                        <div class="btn-bg"></div>
+                    </button>
+                    <button class="btn btn-secondary" id="learn-btn">
+                        <span>Learn More</span>
+                        <div class="btn-bg"></div>
+                    </button>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="scroll-arrow"></div>
+                <span>Scroll to explore</span>
+            </div>
+        </section>
+
+        <!-- Markets Section -->
+        <section id="markets" class="markets-section">
+            <div class="section-header">
+                <h2 class="section-title">Galactic Markets</h2>
+                <p class="section-subtitle">Real-time trading across the universe</p>
+            </div>
+            <div class="markets-grid">
+                <div class="market-card" data-planet="earth">
+                    <div class="card-header">
+                        <span class="planet-icon">🌍</span>
+                        <h3>Earth Markets</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value" data-target="1250000">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value positive">+5.4%</span>
+                        </div>
+                    </div>
+                    <div class="market-chart">
+                        <canvas class="chart-canvas" width="300" height="150"></canvas>
+                    </div>
+                </div>
+
+                <div class="market-card" data-planet="mars">
+                    <div class="card-header">
+                        <span class="planet-icon">🔴</span>
+                        <h3>Mars Colony</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value" data-target="850000">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value positive">+12.7%</span>
+                        </div>
+                    </div>
+                    <div class="market-chart">
+                        <canvas class="chart-canvas" width="300" height="150"></canvas>
+                    </div>
+                </div>
+
+                <div class="market-card" data-planet="jupiter">
+                    <div class="card-header">
+                        <span class="planet-icon">🟠</span>
+                        <h3>Jupiter Station</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value" data-target="2100000">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value negative">-2.1%</span>
+                        </div>
+                    </div>
+                    <div class="market-chart">
+                        <canvas class="chart-canvas" width="300" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Planets Section -->
+        <section id="planets" class="planets-section">
+            <div class="section-header">
+                <h2 class="section-title">Explore Planets</h2>
+                <p class="section-subtitle">Discover trading opportunities across the cosmos</p>
+            </div>
+            <div class="planets-container">
+                <div class="planet-item" data-planet="mercury">
+                    <div class="planet-visual">
+                        <div class="planet-sphere mercury"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Mercury</h3>
+                        <p>High-speed transactions and solar energy trading</p>
+                        <div class="planet-stats">
+                            <span>Markets: 15</span>
+                            <span>Traders: 50K+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planet-item" data-planet="venus">
+                    <div class="planet-visual">
+                        <div class="planet-sphere venus"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Venus</h3>
+                        <p>Atmospheric mining and chemical compounds</p>
+                        <div class="planet-stats">
+                            <span>Markets: 23</span>
+                            <span>Traders: 120K+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planet-item" data-planet="mars">
+                    <div class="planet-visual">
+                        <div class="planet-sphere mars"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Mars</h3>
+                        <p>Colonial expansion and terraforming resources</p>
+                        <div class="planet-stats">
+                            <span>Markets: 45</span>
+                            <span>Traders: 300K+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading Section -->
+        <section id="trading" class="trading-section">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Trading</h2>
+                <p class="section-subtitle">AI-powered tools for cosmic commerce</p>
+            </div>
+            <div class="trading-interface">
+                <div class="trading-panel">
+                    <div class="panel-header">
+                        <h3>Trading Dashboard</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn active">Live</button>
+                            <button class="control-btn">Historical</button>
+                            <button class="control-btn">Analysis</button>
+                        </div>
+                    </div>
+                    <div class="trading-content">
+                        <div class="trading-chart">
+                            <canvas id="main-chart" width="800" height="400"></canvas>
+                        </div>
+                        <div class="trading-tools">
+                            <div class="tool-group">
+                                <h4>Quick Actions</h4>
+                                <button class="tool-btn">Buy Order</button>
+                                <button class="tool-btn">Sell Order</button>
+                                <button class="tool-btn">Stop Loss</button>
+                            </div>
+                            <div class="tool-group">
+                                <h4>Portfolio</h4>
+                                <div class="portfolio-item">
+                                    <span>Cosmic Credits</span>
+                                    <span class="portfolio-value">₡ 125,430</span>
+                                </div>
+                                <div class="portfolio-item">
+                                    <span>Solar Shares</span>
+                                    <span class="portfolio-value">⚡ 2,340</span>
+                                </div>
+                                <div class="portfolio-item">
+                                    <span>Quantum Tokens</span>
+                                    <span class="portfolio-value">⚛ 850</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="section-header">
+                <h2 class="section-title">Join the Cosmic Economy</h2>
+                <p class="section-subtitle">Start your interplanetary trading journey today</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-form">
+                    <form id="cosmic-form">
+                        <div class="form-group">
+                            <input type="text" id="name" required>
+                            <label for="name">Your Name</label>
+                            <div class="form-border"></div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" required>
+                            <label for="email">Cosmic Email</label>
+                            <div class="form-border"></div>
+                        </div>
+                        <div class="form-group">
+                            <select id="planet" required>
+                                <option value="">Select Home Planet</option>
+                                <option value="earth">Earth</option>
+                                <option value="mars">Mars</option>
+                                <option value="jupiter">Jupiter Station</option>
+                                <option value="other">Other Galaxy</option>
+                            </select>
+                            <label for="planet">Home Planet</label>
+                            <div class="form-border"></div>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" required></textarea>
+                            <label for="message">Your Message</label>
+                            <div class="form-border"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>Launch Communication</span>
+                            <div class="btn-bg"></div>
+                        </button>
+                    </form>
+                </div>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <span class="info-icon">📡</span>
+                        <div>
+                            <h4>Quantum Communication</h4>
+                            <p>Instant messaging across galaxies</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🚀</span>
+                        <div>
+                            <h4>Interplanetary Support</h4>
+                            <p>24/7 assistance across all systems</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">⚡</span>
+                        <div>
+                            <h4>Lightning Fast</h4>
+                            <p>Faster than light transactions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Cosmic Economy</h4>
+                <p>Building the future of interplanetary commerce</p>
+            </div>
+            <div class="footer-section">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="#markets">Markets</a></li>
+                    <li><a href="#planets">Planets</a></li>
+                    <li><a href="#trading">Trading</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link">🌌</a>
+                    <a href="#" class="social-link">🚀</a>
+                    <a href="#" class="social-link">⚡</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Cosmic Economy. All rights reserved across the universe.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
