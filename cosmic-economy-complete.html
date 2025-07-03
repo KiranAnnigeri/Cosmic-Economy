@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Economy - Futuristic Trading Platform</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r158/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.34/bundled/lenis.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #ff6b6b;
+            --accent-color: #ffd700;
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #0066cc 100%);
+            --font-primary: 'Orbitron', monospace;
+            --font-secondary: 'Exo 2', sans-serif;
+            --header-height: 80px;
+            --transition-fast: 0.3s ease;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-secondary);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .cosmic-loader {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+        }
+
+        .orbit {
+            position: absolute;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            animation: rotate 3s linear infinite;
+        }
+
+        .orbit:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 70px;
+            left: 70px;
+        }
+
+        .orbit:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 40px;
+            left: 40px;
+            animation-duration: 4s;
+            animation-direction: reverse;
+        }
+
+        .planet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary-color);
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .loading-text {
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            text-shadow: 0 0 20px var(--primary-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 3D Container */
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 35%, #0f0f0f 100%);
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--header-height) 2rem 0;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: var(--font-primary);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+        }
+
+        .title-line {
+            display: block;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: slideInUp 1s ease forwards;
+        }
+
+        .title-line:nth-child(2) {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation-delay: 0.2s;
+        }
+
+        .title-line:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            animation: fadeInUp 1s ease 0.6s forwards;
+            opacity: 0;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.8s forwards;
+            opacity: 0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Sections */
+        section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Markets Section */
+        .markets-section {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .markets-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .market-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .market-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .planet-icon {
+            font-size: 2rem;
+        }
+
+        .card-header h3 {
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .market-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: var(--font-primary);
+        }
+
+        .stat-value.positive {
+            color: #4ade80;
+        }
+
+        .stat-value.negative {
+            color: #f87171;
+        }
+
+        /* Planets Section */
+        .planets-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .planet-item {
+            text-align: center;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .planet-item:hover {
+            transform: scale(1.05);
+        }
+
+        .planet-visual {
+            margin-bottom: 2rem;
+        }
+
+        .planet-sphere {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+        }
+
+        .planet-sphere.mercury {
+            background: radial-gradient(circle at 30% 30%, #ffa500, #ff6347);
+        }
+
+        .planet-sphere.venus {
+            background: radial-gradient(circle at 30% 30%, #ffd700, #ff69b4);
+        }
+
+        .planet-sphere.mars {
+            background: radial-gradient(circle at 30% 30%, #cd5c5c, #8b0000);
+        }
+
+        .planet-info h3 {
+            font-family: var(--font-primary);
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .planet-info p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .planet-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .planet-stats span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotateY(180deg);
+            }
+        }
+
+        /* Contact Section */
+        .contact-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-form {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+            pointer-events: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-bottom-color: var(--primary-color);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        .info-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(10px);
+        }
+
+        .info-icon {
+            font-size: 2rem;
+        }
+
+        .info-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-primary);
+        }
+
+        .info-item p {
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-darker);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 3rem 0 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-family: var(--font-primary);
+        }
+
+        .footer-section p {
+            color: var(--text-secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .planet-sphere {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .planet-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .contact-form {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="cosmic-loader">
+                <div class="orbit">
+                    <div class="planet"></div>
+                </div>
+                <div class="orbit">
+                    <div class="planet"></div>
+                </div>
+            </div>
+            <h2 class="loading-text">Initializing Cosmic Economy</h2>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="logo-icon">🌌</span>
+                <span class="logo-text">Cosmic Economy</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#markets">Markets</a></li>
+                <li><a href="#planets">Planets</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 3D Background Container -->
+    <div id="three-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">Welcome to the</span>
+                    <span class="title-line">Cosmic Economy</span>
+                    <span class="title-line">of Tomorrow</span>
+                </h1>
+                <p class="hero-description">
+                    Experience interplanetary trading like never before. Navigate through distant galaxies, 
+                    discover new economic opportunities, and build your cosmic empire.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollToSection('#markets')">
+                        Explore Universe
+                    </button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('#planets')">
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Markets Section -->
+        <section id="markets" class="markets-section">
+            <div class="section-header">
+                <h2 class="section-title">Galactic Markets</h2>
+                <p class="section-subtitle">Real-time trading across the universe</p>
+            </div>
+            <div class="markets-grid">
+                <div class="market-card">
+                    <div class="card-header">
+                        <span class="planet-icon">🌍</span>
+                        <h3>Earth Markets</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value">1,250,000</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value positive">+5.4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-card">
+                    <div class="card-header">
+                        <span class="planet-icon">🔴</span>
+                        <h3>Mars Colony</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value">850,000</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value positive">+12.7%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-card">
+                    <div class="card-header">
+                        <span class="planet-icon">🟠</span>
+                        <h3>Jupiter Station</h3>
+                    </div>
+                    <div class="market-stats">
+                        <div class="stat">
+                            <span class="stat-label">Volume</span>
+                            <span class="stat-value">2,100,000</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value negative">-2.1%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Planets Section -->
+        <section id="planets" class="planets-section">
+            <div class="section-header">
+                <h2 class="section-title">Explore Planets</h2>
+                <p class="section-subtitle">Discover trading opportunities across the cosmos</p>
+            </div>
+            <div class="planets-container">
+                <div class="planet-item">
+                    <div class="planet-visual">
+                        <div class="planet-sphere mercury"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Mercury</h3>
+                        <p>High-speed transactions and solar energy trading</p>
+                        <div class="planet-stats">
+                            <span>Markets: 15</span>
+                            <span>Traders: 50K+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planet-item">
+                    <div class="planet-visual">
+                        <div class="planet-sphere venus"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Venus</h3>
+                        <p>Atmospheric mining and chemical compounds</p>
+                        <div class="planet-stats">
+                            <span>Markets: 23</span>
+                            <span>Traders: 120K+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planet-item">
+                    <div class="planet-visual">
+                        <div class="planet-sphere mars"></div>
+                    </div>
+                    <div class="planet-info">
+                        <h3>Mars</h3>
+                        <p>Colonial expansion and terraforming resources</p>
+                        <div class="planet-stats">
+                            <span>Markets: 45</span>
+                            <span>Traders: 300K+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="section-header">
+                <h2 class="section-title">Join the Cosmic Economy</h2>
+                <p class="section-subtitle">Start your interplanetary trading journey today</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <input type="text" required>
+                            <label>Your Name</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" required>
+                            <label>Cosmic Email</label>
+                        </div>
+                        <div class="form-group">
+                            <select required>
+                                <option value="">Select Home Planet</option>
+                                <option value="earth">Earth</option>
+                                <option value="mars">Mars</option>
+                                <option value="jupiter">Jupiter Station</option>
+                            </select>
+                            <label>Home Planet</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea required></textarea>
+                            <label>Your Message</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Launch Communication 🚀
+                        </button>
+                    </form>
+                </div>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <span class="info-icon">📡</span>
+                        <div>
+                            <h4>Quantum Communication</h4>
+                            <p>Instant messaging across galaxies</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🚀</span>
+                        <div>
+                            <h4>Interplanetary Support</h4>
+                            <p>24/7 assistance across all systems</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">⚡</span>
+                        <div>
+                            <h4>Lightning Fast</h4>
+                            <p>Faster than light transactions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Cosmic Economy</h4>
+                <p>Building the future of interplanetary commerce</p>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <span>🌌 🚀 ⚡</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Cosmic Economy. All rights reserved across the universe.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let scene, camera, renderer, stars, planets = [];
+        let isLoading = true;
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            init3DScene();
+            initAnimations();
+            initInteractivity();
+            animate();
+            setTimeout(hideLoadingScreen, 3000);
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.add('hidden');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                isLoading = false;
+            }, 500);
+        }
+
+        function init3DScene() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const container = document.getElementById('three-container');
+            container.appendChild(renderer.domElement);
+
+            // Create starfield
+            createStarfield();
+            createPlanets();
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0x00d4ff, 1);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createStarfield() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = window.innerWidth < 768 ? 2000 : 5000; // Reduced for mobile
+            const starPositions = new Float32Array(starCount * 3);
+
+            for (let i = 0; i < starCount * 3; i++) {
+                starPositions[i] = (Math.random() - 0.5) * 2000;
+            }
+
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: Math.random() * 2 + 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+        }
+
+        function createPlanets() {
+            const planetData = [
+                { radius: 0.8, color: 0x00d4ff, position: [-15, 5, -10], speed: 0.01 },
+                { radius: 1.2, color: 0xff6b6b, position: [15, -5, -15], speed: 0.008 },
+                { radius: 0.6, color: 0xffd700, position: [-8, -8, -5], speed: 0.012 }
+            ];
+
+            planetData.forEach((data, index) => {
+                const geometry = new THREE.SphereGeometry(data.radius, 16, 16); // Reduced segments for mobile
+                const material = new THREE.MeshPhongMaterial({
+                    color: data.color,
+                    emissive: data.color,
+                    emissiveIntensity: 0.1,
+                    shininess: 100
+                });
+
+                const planet = new THREE.Mesh(geometry, material);
+                planet.position.set(...data.position);
+                planet.userData = { speed: data.speed, originalY: data.position[1] };
+
+                planets.push(planet);
+                scene.add(planet);
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!isLoading) {
+                // Rotate stars
+                if (stars) {
+                    stars.rotation.x += 0.0005;
+                    stars.rotation.y += 0.0002;
+                }
+
+                // Animate planets
+                planets.forEach((planet, index) => {
+                    planet.rotation.y += planet.userData.speed;
+                    planet.rotation.x += planet.userData.speed * 0.5;
+                    planet.position.y = planet.userData.originalY + Math.sin(Date.now() * 0.001 + index) * 2;
+                });
+
+                // Mouse parallax effect (simplified for mobile)
+                if (window.mouseX && window.mouseY) {
+                    const mouseX = (window.innerWidth / 2 - window.mouseX) * 0.0001;
+                    const mouseY = (window.innerHeight / 2 - window.mouseY) * 0.0001;
+                    
+                    camera.position.x += (mouseX - camera.position.x) * 0.05;
+                    camera.position.y += (mouseY - camera.position.y) * 0.05;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Mouse tracking for parallax
+        window.addEventListener('mousemove', (event) => {
+            window.mouseX = event.clientX;
+            window.mouseY = event.clientY;
+        });
+
+        function initAnimations() {
+            if (typeof gsap !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+
+                // Hero animations
+                gsap.timeline({ delay: 3.5 })
+                    .from('.hero-title .title-line', {
+                        y: 100,
+                        opacity: 0,
+                        duration: 1,
+                        stagger: 0.2,
+                        ease: 'power3.out'
+                    })
+                    .from('.hero-description', {
+                        y: 50,
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: 'power2.out'
+                    }, '-=0.3')
+                    .from('.hero-buttons', {
+                        y: 30,
+                        opacity: 0,
+                        duration: 0.6,
+                        ease: 'back.out(1.7)'
+                    }, '-=0.2');
+
+                // Scroll animations
+                gsap.from('.market-card', {
+                    scrollTrigger: {
+                        trigger: '.markets-grid',
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    y: 60,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: 'power3.out'
+                });
+
+                gsap.from('.planet-item', {
+                    scrollTrigger: {
+                        trigger: '.planets-container',
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    y: 80,
+                    opacity: 0,
+                    duration: 1,
+                    stagger: 0.3,
+                    ease: 'back.out(1.7)'
+                });
+            }
+        }
+
+        function initInteractivity() {
+            // Market card hover effects
+            document.querySelectorAll('.market-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(this, {
+                            y: -10,
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(this, {
+                            y: 0,
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+            });
+
+            // Planet hover effects
+            document.querySelectorAll('.planet-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const sphere = this.querySelector('.planet-sphere');
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(sphere, {
+                            scale: 1.1,
+                            duration: 0.5,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    const sphere = this.querySelector('.planet-sphere');
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(sphere, {
+                            scale: 1,
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+            });
+
+            // Form enhancements
+            document.querySelectorAll('.form-group').forEach(group => {
+                const input = group.querySelector('input, textarea, select');
+                const label = group.querySelector('label');
+
+                input.addEventListener('focus', () => {
+                    if (typeof gsap !== 'undefined') {
+                        gsap.to(label, {
+                            y: -20,
+                            scale: 0.8,
+                            color: '#00d4ff',
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+
+                input.addEventListener('blur', () => {
+                    if (!input.value && typeof gsap !== 'undefined') {
+                        gsap.to(label, {
+                            y: 0,
+                            scale: 1,
+                            color: '#b0b0b0',
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        });
+                    }
+                });
+            });
+        }
+
+        function scrollToSection(selector) {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Handle page visibility for performance
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                renderer.setAnimationLoop(null);
+            } else {
+                renderer.setAnimationLoop(animate);
+            }
+        });
+    </script>
+</body>
+</html>
