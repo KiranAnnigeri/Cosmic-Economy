@@ -6,19 +6,792 @@
     <title>Cosmic Economy - Futuristic Trading Platform</title>
     <meta name="description" content="Experience the future of economy in a cosmic 3D environment">
     
-    <!-- Preload critical fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Critical CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Three.js and GSAP from CDN for faster loading -->
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r158/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.34/bundled/lenis.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #06b6d4;
+            --accent-color: #8b5cf6;
+            --bg-dark: #0f0f23;
+            --bg-darker: #050510;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(99, 102, 241, 0.2);
+            --font-primary: 'Space Grotesk', sans-serif;
+            --font-secondary: 'Inter', sans-serif;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-secondary);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* CRITICAL: Ensure all content is visible regardless of JS loading */
+        * {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0 !important;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .cosmic-loader {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .orbit {
+            position: absolute;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            animation: rotate 3s linear infinite;
+        }
+
+        .orbit:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 70px;
+            left: 70px;
+        }
+
+        .orbit:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 40px;
+            left: 40px;
+            animation-duration: 4s;
+            animation-direction: reverse;
+        }
+
+        .planet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary-color);
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .loading-text {
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 2rem;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            text-shadow: 0 0 20px var(--primary-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 3D Container */
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 35%, var(--bg-darker) 100%);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 2rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-family: var(--font-primary);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+        }
+
+        .cosmic-text {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Floating Data Cards */
+        .floating-cards {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-card:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-card:nth-child(2) {
+            top: 15%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-card:nth-child(3) {
+            bottom: 30%;
+            left: 5%;
+            animation-delay: 4s;
+        }
+
+        .floating-card:nth-child(4) {
+            bottom: 25%;
+            right: 10%;
+            animation-delay: 1s;
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-family: var(--font-primary);
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Sections */
+        section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Markets Section */
+        .markets-section {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .markets-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .market-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .market-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .planet-icon {
+            font-size: 2.5rem;
+        }
+
+        .card-header h3 {
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .market-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: var(--font-primary);
+        }
+
+        .stat-value.positive {
+            color: #10b981;
+        }
+
+        .stat-value.negative {
+            color: #ef4444;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary-color);
+        }
+
+        .stat-number {
+            font-family: var(--font-primary);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Planets Section */
+        .planets-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .planet-item {
+            text-align: center;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .planet-item:hover {
+            transform: scale(1.05);
+        }
+
+        .planet-visual {
+            margin-bottom: 2rem;
+            perspective: 1000px;
+        }
+
+        .planet-sphere {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: planetRotate 10s linear infinite;
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .planet-sphere::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: planetShine 3s linear infinite;
+        }
+
+        .planet-sphere.earth {
+            background: radial-gradient(circle at 30% 30%, #4ade80, #1e40af, #0f172a);
+        }
+
+        .planet-sphere.mars {
+            background: radial-gradient(circle at 30% 30%, #f97316, #dc2626, #7f1d1d);
+        }
+
+        .planet-sphere.jupiter {
+            background: radial-gradient(circle at 30% 30%, #fbbf24, #f59e0b, #92400e);
+        }
+
+        .planet-info h3 {
+            font-family: var(--font-primary);
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .planet-info p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .planet-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .planet-stats span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes planetRotate {
+            0% {
+                transform: rotateY(0deg);
+            }
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        @keyframes planetShine {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Contact Section */
+        .contact-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 3rem;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label,
+        .form-group select:focus + label,
+        .form-group textarea:focus + label,
+        .form-group textarea:not(:placeholder-shown) + label {
+            top: -0.5rem;
+            left: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            background: var(--bg-dark);
+            padding: 0 0.5rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            border-color: var(--secondary-color);
+            transform: translateX(10px);
+        }
+
+        .info-icon {
+            font-size: 2rem;
+        }
+
+        .info-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            color: var(--text-secondary);
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .floating-cards {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .markets-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+
+            .planets-container {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 0 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3rem 0 1rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-family: var(--font-primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+    </style>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -28,17 +801,11 @@
                 <div class="orbit">
                     <div class="planet"></div>
                 </div>
-                <div class="orbit orbit-2">
-                    <div class="planet planet-2"></div>
-                </div>
-                <div class="orbit orbit-3">
-                    <div class="planet planet-3"></div>
+                <div class="orbit">
+                    <div class="planet"></div>
                 </div>
             </div>
-            <h2 class="loading-text">Initializing Cosmic Economy</h2>
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
-            </div>
+            <div class="loading-text">Initializing Cosmic Economy</div>
         </div>
     </div>
 
@@ -47,20 +814,15 @@
         <div class="nav-content">
             <div class="logo">
                 <span class="logo-icon">🌌</span>
-                <span class="logo-text">Cosmic Economy</span>
+                <span>Cosmic Economy</span>
             </div>
             <ul class="nav-menu">
-                <li><a href="#home" data-text="Home">Home</a></li>
-                <li><a href="#markets" data-text="Markets">Markets</a></li>
-                <li><a href="#planets" data-text="Planets">Planets</a></li>
-                <li><a href="#trading" data-text="Trading">Trading</a></li>
-                <li><a href="#contact" data-text="Contact">Contact</a></li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#markets">Markets</a></li>
+                <li><a href="#planets">Planets</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
-            <div class="nav-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
         </div>
     </nav>
 
@@ -71,30 +833,36 @@
     <main class="main-content">
         <!-- Hero Section -->
         <section id="home" class="hero-section">
+            <div class="floating-cards">
+                <div class="floating-card">
+                    <div class="card-title">Total Volume</div>
+                    <div class="card-value">$5.2T</div>
+                </div>
+                <div class="floating-card">
+                    <div class="card-title">Active Traders</div>
+                    <div class="card-value">50M+</div>
+                </div>
+                <div class="floating-card">
+                    <div class="card-title">Planets</div>
+                    <div class="card-value">15</div>
+                </div>
+                <div class="floating-card">
+                    <div class="card-title">Uptime</div>
+                    <div class="card-value">99.9%</div>
+                </div>
+            </div>
             <div class="hero-content">
                 <h1 class="hero-title">
-                    <span class="title-line">Welcome to the</span>
-                    <span class="title-line cosmic-text">Cosmic Economy</span>
-                    <span class="title-line">of Tomorrow</span>
+                    Welcome to the <span class="cosmic-text">Cosmic Economy</span> of Tomorrow
                 </h1>
                 <p class="hero-description">
                     Experience interplanetary trading like never before. Navigate through distant galaxies, 
                     discover new economic opportunities, and build your cosmic empire.
                 </p>
                 <div class="hero-buttons">
-                    <button class="btn btn-primary" id="explore-btn">
-                        <span>Explore Universe</span>
-                        <div class="btn-bg"></div>
-                    </button>
-                    <button class="btn btn-secondary" id="learn-btn">
-                        <span>Learn More</span>
-                        <div class="btn-bg"></div>
-                    </button>
+                    <a href="#markets" class="btn btn-primary">Explore Universe</a>
+                    <a href="#contact" class="btn btn-secondary">Join Now</a>
                 </div>
-            </div>
-            <div class="scroll-indicator">
-                <div class="scroll-arrow"></div>
-                <span>Scroll to explore</span>
             </div>
         </section>
 
@@ -105,27 +873,28 @@
                 <p class="section-subtitle">Real-time trading across the universe</p>
             </div>
             <div class="markets-grid">
-                <div class="market-card" data-planet="earth">
+                <div class="market-card">
                     <div class="card-header">
                         <span class="planet-icon">🌍</span>
-                        <h3>Earth Markets</h3>
+                        <h3>Earth Exchange</h3>
                     </div>
                     <div class="market-stats">
                         <div class="stat">
                             <span class="stat-label">Volume</span>
-                            <span class="stat-value" data-target="1250000">0</span>
+                            <span class="stat-value">$2.4T</span>
                         </div>
                         <div class="stat">
                             <span class="stat-label">Change</span>
                             <span class="stat-value positive">+5.4%</span>
                         </div>
-                    </div>
-                    <div class="market-chart">
-                        <canvas class="chart-canvas" width="300" height="150"></canvas>
+                        <div class="stat">
+                            <span class="stat-label">Markets</span>
+                            <span class="stat-value">45</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="market-card" data-planet="mars">
+                <div class="market-card">
                     <div class="card-header">
                         <span class="planet-icon">🔴</span>
                         <h3>Mars Colony</h3>
@@ -133,19 +902,20 @@
                     <div class="market-stats">
                         <div class="stat">
                             <span class="stat-label">Volume</span>
-                            <span class="stat-value" data-target="850000">0</span>
+                            <span class="stat-value">$850B</span>
                         </div>
                         <div class="stat">
                             <span class="stat-label">Change</span>
                             <span class="stat-value positive">+12.7%</span>
                         </div>
-                    </div>
-                    <div class="market-chart">
-                        <canvas class="chart-canvas" width="300" height="150"></canvas>
+                        <div class="stat">
+                            <span class="stat-label">Markets</span>
+                            <span class="stat-value">23</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="market-card" data-planet="jupiter">
+                <div class="market-card">
                     <div class="card-header">
                         <span class="planet-icon">🟠</span>
                         <h3>Jupiter Station</h3>
@@ -153,16 +923,43 @@
                     <div class="market-stats">
                         <div class="stat">
                             <span class="stat-label">Volume</span>
-                            <span class="stat-value" data-target="2100000">0</span>
+                            <span class="stat-value">$1.2T</span>
                         </div>
                         <div class="stat">
                             <span class="stat-label">Change</span>
                             <span class="stat-value negative">-2.1%</span>
                         </div>
+                        <div class="stat">
+                            <span class="stat-label">Markets</span>
+                            <span class="stat-value">18</span>
+                        </div>
                     </div>
-                    <div class="market-chart">
-                        <canvas class="chart-canvas" width="300" height="150"></canvas>
-                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section id="stats" class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">Cosmic Impact</h2>
+                <p class="section-subtitle">Numbers that define our universe</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">50M+</div>
+                    <div class="stat-description">Active Traders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$5.2T</div>
+                    <div class="stat-description">Trading Volume</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-description">Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15</div>
+                    <div class="stat-description">Planets Connected</div>
                 </div>
             </div>
         </section>
@@ -174,92 +971,44 @@
                 <p class="section-subtitle">Discover trading opportunities across the cosmos</p>
             </div>
             <div class="planets-container">
-                <div class="planet-item" data-planet="mercury">
+                <div class="planet-item">
                     <div class="planet-visual">
-                        <div class="planet-sphere mercury"></div>
+                        <div class="planet-sphere earth"></div>
                     </div>
                     <div class="planet-info">
-                        <h3>Mercury</h3>
-                        <p>High-speed transactions and solar energy trading</p>
+                        <h3>Earth</h3>
+                        <p>The birthplace of galactic commerce with established markets and stable trading</p>
                         <div class="planet-stats">
-                            <span>Markets: 15</span>
-                            <span>Traders: 50K+</span>
+                            <span>Markets: 45</span>
+                            <span>Traders: 25M+</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="planet-item" data-planet="venus">
-                    <div class="planet-visual">
-                        <div class="planet-sphere venus"></div>
-                    </div>
-                    <div class="planet-info">
-                        <h3>Venus</h3>
-                        <p>Atmospheric mining and chemical compounds</p>
-                        <div class="planet-stats">
-                            <span>Markets: 23</span>
-                            <span>Traders: 120K+</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="planet-item" data-planet="mars">
+                <div class="planet-item">
                     <div class="planet-visual">
                         <div class="planet-sphere mars"></div>
                     </div>
                     <div class="planet-info">
                         <h3>Mars</h3>
-                        <p>Colonial expansion and terraforming resources</p>
+                        <p>Growing colonial markets with high-growth potential and mining opportunities</p>
                         <div class="planet-stats">
-                            <span>Markets: 45</span>
-                            <span>Traders: 300K+</span>
+                            <span>Markets: 23</span>
+                            <span>Traders: 12M+</span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Trading Section -->
-        <section id="trading" class="trading-section">
-            <div class="section-header">
-                <h2 class="section-title">Advanced Trading</h2>
-                <p class="section-subtitle">AI-powered tools for cosmic commerce</p>
-            </div>
-            <div class="trading-interface">
-                <div class="trading-panel">
-                    <div class="panel-header">
-                        <h3>Trading Dashboard</h3>
-                        <div class="panel-controls">
-                            <button class="control-btn active">Live</button>
-                            <button class="control-btn">Historical</button>
-                            <button class="control-btn">Analysis</button>
-                        </div>
+                <div class="planet-item">
+                    <div class="planet-visual">
+                        <div class="planet-sphere jupiter"></div>
                     </div>
-                    <div class="trading-content">
-                        <div class="trading-chart">
-                            <canvas id="main-chart" width="800" height="400"></canvas>
-                        </div>
-                        <div class="trading-tools">
-                            <div class="tool-group">
-                                <h4>Quick Actions</h4>
-                                <button class="tool-btn">Buy Order</button>
-                                <button class="tool-btn">Sell Order</button>
-                                <button class="tool-btn">Stop Loss</button>
-                            </div>
-                            <div class="tool-group">
-                                <h4>Portfolio</h4>
-                                <div class="portfolio-item">
-                                    <span>Cosmic Credits</span>
-                                    <span class="portfolio-value">₡ 125,430</span>
-                                </div>
-                                <div class="portfolio-item">
-                                    <span>Solar Shares</span>
-                                    <span class="portfolio-value">⚡ 2,340</span>
-                                </div>
-                                <div class="portfolio-item">
-                                    <span>Quantum Tokens</span>
-                                    <span class="portfolio-value">⚛ 850</span>
-                                </div>
-                            </div>
+                    <div class="planet-info">
+                        <h3>Jupiter</h3>
+                        <p>Advanced space station trading hub with cutting-edge technology markets</p>
+                        <div class="planet-stats">
+                            <span>Markets: 18</span>
+                            <span>Traders: 8M+</span>
                         </div>
                     </div>
                 </div>
@@ -276,14 +1025,12 @@
                 <div class="contact-form">
                     <form id="cosmic-form">
                         <div class="form-group">
-                            <input type="text" id="name" required>
+                            <input type="text" id="name" required placeholder=" ">
                             <label for="name">Your Name</label>
-                            <div class="form-border"></div>
                         </div>
                         <div class="form-group">
-                            <input type="email" id="email" required>
+                            <input type="email" id="email" required placeholder=" ">
                             <label for="email">Cosmic Email</label>
-                            <div class="form-border"></div>
                         </div>
                         <div class="form-group">
                             <select id="planet" required>
@@ -294,17 +1041,12 @@
                                 <option value="other">Other Galaxy</option>
                             </select>
                             <label for="planet">Home Planet</label>
-                            <div class="form-border"></div>
                         </div>
                         <div class="form-group">
-                            <textarea id="message" required></textarea>
+                            <textarea id="message" required placeholder=" " rows="4"></textarea>
                             <label for="message">Your Message</label>
-                            <div class="form-border"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            <span>Launch Communication</span>
-                            <div class="btn-bg"></div>
-                        </button>
+                        <button type="submit" class="btn btn-primary">Launch Communication</button>
                     </form>
                 </div>
                 <div class="contact-info">
@@ -346,16 +1088,16 @@
                 <ul>
                     <li><a href="#markets">Markets</a></li>
                     <li><a href="#planets">Planets</a></li>
-                    <li><a href="#trading">Trading</a></li>
+                    <li><a href="#stats">Statistics</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h4>Connect</h4>
-                <div class="social-links">
-                    <a href="#" class="social-link">🌌</a>
-                    <a href="#" class="social-link">🚀</a>
-                    <a href="#" class="social-link">⚡</a>
-                </div>
+                <ul>
+                    <li><a href="#contact">Contact Us</a></li>
+                    <li><a href="#support">Support</a></li>
+                    <li><a href="#community">Community</a></li>
+                </ul>
             </div>
         </div>
         <div class="footer-bottom">
@@ -363,7 +1105,132 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="script.js"></script>
+    <script>
+        // Hide loading screen after maximum 800ms regardless of JavaScript status
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('hidden');
+            }
+        }, 800);
+
+        // Initialize Three.js Scene
+        let scene, camera, renderer, particles = [];
+        let particleCount = window.innerWidth < 768 ? 800 : 1500;
+
+        function initThreeJS() {
+            const container = document.getElementById('three-container');
+            if (!container) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create particles
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                positions.push(
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000
+                );
+                colors.push(Math.random(), Math.random() * 0.5 + 0.5, 1);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 1000;
+        }
+
+        function animate() {
+            if (!renderer || !scene || !camera) return;
+            
+            requestAnimationFrame(animate);
+            
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.001;
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        function handleResize() {
+            if (!camera || !renderer) return;
+            
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Initialize everything
+        function init() {
+            try {
+                if (typeof THREE !== 'undefined') {
+                    initThreeJS();
+                    animate();
+                }
+            } catch (error) {
+                console.log('3D background not available');
+            }
+
+            // Smooth scrolling
+            if (typeof Lenis !== 'undefined') {
+                const lenis = new Lenis();
+                function raf(time) {
+                    lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+                requestAnimationFrame(raf);
+            }
+
+            // Navigation smooth scroll
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Form submission
+            const form = document.getElementById('cosmic-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Message sent to the cosmic network! 🚀');
+                });
+            }
+        }
+
+        // Event listeners
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('load', init);
+        
+        // Initialize immediately if DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
 </body>
 </html>
